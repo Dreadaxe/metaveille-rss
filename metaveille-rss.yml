@@ -1,0 +1,62 @@
+name: MetaVeille — Flux RSS automatique
+
+on:
+  schedule:
+    # Apify collecte à 08:00 Europe/Paris. Archive à 10:23.
+    # Une nouvelle entrée hebdomadaire apparaît le lundi.
+    - cron: '23 10 * * *'
+      timezone: 'Europe/Paris'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: metaveille-rss
+  cancel-in-progress: false
+
+jobs:
+  construire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Archiver les collectes Apify et préparer RSS et HTML
+        env:
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python build_rss.py
+      - name: Sauvegarder l'historique des collectes dans le dépôt
+        run: |
+          git config user.name 'MetaVeille Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add data/state.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Archive des collectes MetaVeille'
+            git push
+          fi
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  publier:
+    needs: construire
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploiement.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - name: Publier le site et le flux RSS
+        uses: actions/deploy-pages@v4
+        id: deploiement

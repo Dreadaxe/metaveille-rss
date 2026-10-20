@@ -1,0 +1,52 @@
+METAVEILLE RSS AUTO — INSTRUCTIONS (édition de test)
+
+OBJECTIF
+Apify collecte le groupe Facebook tous les jours à 8 h (déjà configuré dans ton compte).
+GitHub Actions récupère les données existantes tous les jours à 10 h 23 heure de Paris,
+les archive et publie une NOUVELLE entrée dans le RSS chaque lundi.
+Le PC n'a pas besoin d'être allumé. MetaVeille ne relance jamais le scraper.
+
+AVANT TOUT
+Le flux RSS et les pages HTML sur GitHub Pages seront PUBLICS. Ils contiendront
+les noms, textes et certains commentaires extraits du groupe Facebook.
+Ne pas utiliser si ces contenus ne doivent pas être republiés publiquement.
+
+INSTALLATION À FAIRE UNE SEULE FOIS (aucune clé dans le chat)
+1. Créer un dépôt GitHub dédié nommé, par exemple, "metaveille-rss".
+2. Ajouter les fichiers de ce dossier à la racine du dépôt, en respectant
+   le dossier caché .github/workflows/metaveille-rss.yml.
+3. Sur GitHub, Settings > Secrets and variables > Actions > New repository secret :
+   Nom : APIFY_TOKEN. Valeur : ta clé API Apify personnelle (ne pas envoyer en chat).
+4. Settings > Pages > Build and deployment > Source : GitHub Actions.
+5. Dans Actions, lancer manuellement "MetaVeille — Flux RSS automatique" une fois,
+   puis vérifier que la génération et le déploiement réussissent.
+
+RÉSULTAT
+https://TON_COMPTE.github.io/metaveille-rss/rss.xml
+https://TON_COMPTE.github.io/metaveille-rss/
+
+COMPORTEMENT
+- Chaque matin, les résultats Apify encore présents sont lus et archivés.
+- Les jeux de données temporaires Apify Free peuvent expirer au bout de 7 jours;
+  d'où l'archivage quotidien.
+- Chaque lundi, un nouvel article est visible dans le RSS, avec le numéro de semaine.
+- Le billet contient Title-Only puis Card view avec commentaires dépliables.
+- Le texte du RSS contient les publications et les commentaires accessibles;
+  les lecteurs RSS n'exécutent généralement pas les boutons HTML interactifs.
+- Les commentaires sont une sélection partielle, non la totalité des échanges.
+- Les liens pointent vers Facebook. Les images ne sont pas re-hébergées dans ce kit.
+- Les publications sur les groupes Facebook ne sont pas automatiques.
+- Le RSS expose les contenus ; sa publication doit être autorisée.
+- L'historique des données est stocké dans data/state.json; ne pas l'effacer.
+
+LIMITES / SÉCURITÉ
+- Pas de collecte supplémentaire facturée : appels API de lecture uniquement.
+- Il faut vérifier l'autorisation de republier les contenus du groupe et
+  la visibilité des informations dans un dépôt/site public.
+- GitHub Actions peut retarder une exécution planifiée; une panne ou un workflow
+  désactivé demande une intervention.
+- Les fichiers du dossier site sont régénérés, pas besoin de les enregistrer.
+- Le jeton Apify n'est jamais inclus dans les pages publiques ni les données JSON.
+
+TEST LOCAL FACULTATIF
+python build_rss.py --offline --today 2026-10-19
