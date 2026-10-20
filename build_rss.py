@@ -23,7 +23,7 @@ from zoneinfo import ZoneInfo
 
 GROUP_ID = '309721797057912'
 GROUP_URL = 'https://www.facebook.com/groups/309721797057912/'
-GROUP_NAME = 'Warhammer Quest Fr'
+GROUP_NAME = 'Groupe Facebook Warhammer Quest Fr'
 ACTOR_ID = '2chN8UQcH1CfxLRNE'  # Actor officiel utilisé par le run déjà vérifié
 TZ = ZoneInfo('Europe/Paris')
 ROOT = Path(__file__).resolve().parent
@@ -387,7 +387,7 @@ def rss_summary(info):
 def rss_xml(weeks, base_url, built_at):
     rss = ET.Element('rss', {'version': '2.0'})
     channel = ET.SubElement(rss, 'channel')
-    for k, v in [('title', 'MetaVeille — Warhammer Quest Fr — Bilans hebdomadaires'),
+    for k, v in [('title', 'MetaVeille — Groupe Facebook Warhammer Quest Fr — Bilans hebdomadaires'),
                  ('link', base_url), ('description', 'Un bilan hebdomadaire des nouvelles publications et commentaires retrouvés sur Facebook.'),
                  ('language', 'fr-FR'), ('lastBuildDate', built_at.strftime('%a, %d %b %Y %H:%M:%S +0000'))]:
         ET.SubElement(channel, k).text = v
@@ -443,7 +443,7 @@ def make_site(state, today=None, base_url=None):
                     for name, info in files)
     (SITE / 'index.html').write_text('<!doctype html><html lang="fr"><head><meta charset="utf-8">'
           '<meta name="viewport" content="width=device-width,initial-scale=1">'
-          '<title>MetaVeille — Bilans Warhammer Quest Fr</title><style>' + CSS + '</style></head><body><main>'
+          '<title>MetaVeille — Bilans Groupe Facebook Warhammer Quest Fr</title><style>' + CSS + '</style></head><body><main>'
           '<h1>MetaVeille — Bilans hebdomadaires</h1><p><a href="rss.xml">S’abonner au flux RSS ↗</a></p>'
           '<ul>' + (links or '<li>Première publication en attente.</li>') + '</ul>'
           '<p>Commentaires : sélection partielle, pas la totalité des échanges.</p></main></body></html>',
