@@ -7,6 +7,7 @@ name: Test commentaires
       - feature/ciblage-publications
       - feature/diagnostic-fraicheur
       - feature/audit-apify-publications
+      - feature/audit-entree-apify
   workflow_dispatch:
 jobs:
   tests:
@@ -16,7 +17,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: python -m unittest -v test_comments.py test_comments_discovery.py test_weekly_comments.py test_freshness.py test_audit_apify_posts.py
+      - run: python -m unittest -v test_comments.py test_comments_discovery.py test_weekly_comments.py test_freshness.py test_audit_apify_posts.py test_audit_apify_input.py
       - name: Verify completed Apify dataset (read only)
         env:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
