@@ -428,12 +428,13 @@ def document(info, base_url):
     if not links:
         links.append('<li>Aucune publication ou nouveau commentaire retrouvé dans les données archivées pour cette semaine.</li>')
     notice = activity_notice(info)
+    notice_html = '<p class="activity">' + esc(notice) + '</p>' if notice else ''
     return (f'<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
             f'<title>{esc(title)}</title><link rel="alternate" type="application/rss+xml" title="MetaVeille RSS" href="{esc(base_url)}rss.xml">'
             f'<style>{CSS}</style></head><body><main><header><h1>{esc(title)}</h1>'
             f'<p>{info["new_post_count"]} publications datées de la semaine · {info["new_comment_count"]} commentaires récupérés · '
             f'<a href="{esc(base_url)}rss.xml">S’abonner au RSS</a></p></header>'
-            f'{f"<p class=\"activity\">{esc(notice)}</p>" if notice else ""}'
+            f'{notice_html}'
              f'<nav class="index"><h2>PUBLICATIONS — Title-Only</h2><ol>{"".join(links)}</ol></nav>'
             f'<section><h2>Card view — Publications et commentaires</h2><div class="cardgrid">{"".join(cards)}</div></section>'
             f'<p class="footnote">Commentaires : sélection partielle, pas la totalité des échanges. '
