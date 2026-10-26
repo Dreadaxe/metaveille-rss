@@ -3,6 +3,7 @@ name: Test commentaires
   push:
     branches:
       - feature/commentaires-apify
+      - feature/decouverte-commentaires
   workflow_dispatch:
 jobs:
   tests:
@@ -12,7 +13,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: python -m unittest -v test_comments.py
+      - run: python -m unittest -v test_comments.py test_comments_discovery.py
       - name: Verify completed Apify dataset (read only)
         env:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}

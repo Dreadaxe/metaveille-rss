@@ -26,7 +26,7 @@ GROUP_ID = '309721797057912'
 GROUP_URL = 'https://www.facebook.com/groups/309721797057912/'
 GROUP_NAME = 'Groupe Facebook Warhammer Quest Fr'
 ACTOR_ID = '2chN8UQcH1CfxLRNE'  # Actor officiel utilisé par le run déjà vérifié
-COMMENTS_TEST_RUN_ID = '7q4GdkJQrvbNCXj0v'  # Existing successful run; GET only
+COMMENTS_ACTOR_ID = 'us5srxAYnsrkgUv2v'  # Facebook Comments Scraper; read completed runs only
 TZ = ZoneInfo('Europe/Paris')
 ROOT = Path(__file__).resolve().parent
 STATE = ROOT / 'data' / 'state.json'
@@ -256,7 +256,48 @@ def sync_apify(state, token, now=None):
     return changes
 
 
-def sync_existing_comments_run(state, token, run_id=COMMENTS_TEST_RUN_ID):
+def fetch_comments_runs(token, limit=100):
+    """Discover successful Comments Scraper runs using GET only."""
+    args = urllib.parse.urlencode({'status': 'SUCCEEDED', 'desc': '1', 'limit': min(limit, 100)})
+    response = api_json('/v2/actor-runs?' + args, token)
+    data = response.get('data') or {}
+    return [run for run in data.get('items') or []
+            if str(run.get('actId') or '') == COMMENTS_ACTOR_ID
+            and run.get('status') == 'SUCCEEDED']
+
+
+def sync_comments_runs(state, token, now=None):
+    """Import recent completed comment runs once; never start a paid run."""
+    now = now or datetime.now(timezone.utc)
+    tracked = state.setdefault('comment_runs', {})
+    result = {'runs_imported': 0, 'comments_added': 0, 'comments_updated': 0}
+    runs = fetch_comments_runs(token)
+    for run in sorted(runs, key=lambda r: r.get('finishedAt') or ''):
+        rid = str(run.get('id') or '')
+        if not rid or rid in tracked:
+            continue
+        finished = when(run.get('finishedAt'))
+        if finished is None or now - finished.astimezone(timezone.utc) > timedelta(days=15):
+            continue
+        dataset_id = str(run.get('defaultDatasetId') or '')
+        if not re.fullmatch(r'[a-zA-Z0-9]+', dataset_id):
+            continue
+        query = urllib.parse.urlencode({'format': 'json', 'limit': MAX_ITEMS_PER_DATASET, 'offset': 0})
+        try:
+            items = api_json('/v2/datasets/' + dataset_id + '/items?' + query, token)
+        except FileNotFoundError:
+            continue
+        if not isinstance(items, list):
+            raise RuntimeError('Format du dataset de commentaires invalide.')
+        merged = merge_comments_dataset(state, items, run.get('finishedAt') or utc_now())
+        tracked[rid] = {'items_read': len(items), **merged}
+        result['runs_imported'] += 1
+        result['comments_added'] += merged['comments_added']
+        result['comments_updated'] += merged['comments_updated']
+    return result
+
+
+def sync_existing_comments_run(state, token, run_id='7q4GdkJQrvbNCXj0v'):
     """Read a completed comments run; never start an Actor or incur run charges."""
     if run_id in state.setdefault('comment_runs', {}):
         return {'already_imported': True, 'comments_added': 0}
@@ -490,7 +531,7 @@ def main():
         token = os.environ.get('APIFY_TOKEN', '').strip()
         changes = sync_apify(state, token)
         print('Synchronisation:', changes)
-        print('Commentaires (run existant):', sync_existing_comments_run(state, token))
+        print('Commentaires (runs terminés):', sync_comments_runs(state, token))
     d = date.fromisoformat(args.today) if args.today else datetime.now(TZ).date()
     files = make_site(state, today=d)
     # Only save an archive successfully synchronized or deliberately seeded/offline.
