@@ -11,6 +11,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Examiner les paramètres du dernier run (sans secrets)
+        env:
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+        run: python audit_apify_input.py
       - name: Analyser le dernier dataset Apify existant
         env:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
