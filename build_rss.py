@@ -406,6 +406,16 @@ details{background:#f2f6fc;border-radius:9px;padding:10px;margin:10px 0}summary{
 @media(max-width:700px){.cardgrid{grid-template-columns:1fr}.post{padding:14px}}'''
 
 
+def activity_notice(info):
+    posts = info['new_post_count']
+    comments = info['new_comment_count']
+    if posts == 0 and comments == 0:
+        return 'Aucune nouvelle publication ni aucun nouveau commentaire récupéré cette semaine.'
+    if posts == 0:
+        return f'Aucune nouvelle publication cette semaine. {comments} commentaire(s) récupéré(s) sur des publications antérieures.'
+    return ''
+
+
 def document(info, base_url):
     title = heading(info)
     links = []
@@ -417,12 +427,14 @@ def document(info, base_url):
         cards.append(html_card(entry, idx))
     if not links:
         links.append('<li>Aucune publication ou nouveau commentaire retrouvé dans les données archivées pour cette semaine.</li>')
+    notice = activity_notice(info)
     return (f'<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
             f'<title>{esc(title)}</title><link rel="alternate" type="application/rss+xml" title="MetaVeille RSS" href="{esc(base_url)}rss.xml">'
             f'<style>{CSS}</style></head><body><main><header><h1>{esc(title)}</h1>'
             f'<p>{info["new_post_count"]} publications datées de la semaine · {info["new_comment_count"]} commentaires récupérés · '
             f'<a href="{esc(base_url)}rss.xml">S’abonner au RSS</a></p></header>'
-            f'<nav class="index"><h2>PUBLICATIONS — Title-Only</h2><ol>{"".join(links)}</ol></nav>'
+            f'{f"<p class=\"activity\">{esc(notice)}</p>" if notice else ""}'
+             f'<nav class="index"><h2>PUBLICATIONS — Title-Only</h2><ol>{"".join(links)}</ol></nav>'
             f'<section><h2>Card view — Publications et commentaires</h2><div class="cardgrid">{"".join(cards)}</div></section>'
             f'<p class="footnote">Commentaires : sélection partielle, pas la totalité des échanges. '
             f'Données collectées sans garantie d’exhaustivité. Respecter les autorisations de repartage.</p>'
@@ -430,7 +442,8 @@ def document(info, base_url):
 
 
 def rss_summary(info):
-    lines = ['<p>Publications et commentaires collectés au cours de la semaine.</p>', '<ol>']
+    notice = activity_notice(info)
+    lines = [f'<p>{esc(notice)}</p>' if notice else '<p>Publications et commentaires collectés au cours de la semaine.</p>', '<ol>']
     for entry in info['posts']:
         p = entry['post']
         url = safe_url(p.get('url'))
