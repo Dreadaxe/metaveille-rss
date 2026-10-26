@@ -371,7 +371,7 @@ def document(info, base_url):
     cards = []
     for idx, entry in enumerate(info['posts'], 1):
         p = entry['post']
-        links.append(f'<li><a href="#p{idx}">{esc(flat(p.get("body") or "Publication sans texte", 115))}</a>'
+        links.append(f'<li><a href="#p{idx}">{esc(flat(p.get("body") or ("Publication d’origine non archivée" if p.get("placeholder") else "Publication sans texte"), 115))}</a>'
                      f' <small>— {esc(p.get("author"))}</small></li>')
         cards.append(html_card(entry, idx))
     if not links:
@@ -393,7 +393,7 @@ def rss_summary(info):
     for entry in info['posts']:
         p = entry['post']
         url = safe_url(p.get('url'))
-        lines.append(f'<li><b>{esc(p.get("author"))}</b> — <a href="{esc(url)}">{esc(flat(p.get("body") or "Publication sans texte", 175))}</a>')
+        lines.append(f'<li><b>{esc(p.get("author"))}</b> — <a href="{esc(url)}">{esc(flat(p.get("body") or ("Publication d’origine non archivée" if p.get("placeholder") else "Publication sans texte"), 175))}</a>')
         if entry['comments']:
             lines.append('<ul>')
             for c in entry['comments']:
