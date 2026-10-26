@@ -35,7 +35,11 @@ def inspect(token):
     if not run_id.isalnum():
         raise RuntimeError("ID run invalide")
     # Existing run input; never trigger an Actor.
-    raw = api_json("/v2/actor-runs/" + run_id + "/input", token)
+    run_details = api_json("/v2/actor-runs/" + run_id, token).get("data") or {}
+    store_id = str(run_details.get("defaultKeyValueStoreId") or "")
+    if not store_id.isalnum():
+        raise RuntimeError("ID du key-value store Apify absent ou invalide")
+    raw = api_json("/v2/key-value-stores/" + store_id + "/records/INPUT", token)
     return run_id, redact_input(raw)
 
 
