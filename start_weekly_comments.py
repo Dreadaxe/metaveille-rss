@@ -11,7 +11,7 @@ import urllib.request
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-TASK_ID = os.environ.get("APIFY_COMMENTS_TASK_ID", "dreadaxe~metaveille-commentaires-wqfr")
+TASK_ID = (os.environ.get("APIFY_COMMENTS_TASK_ID") or "dreadaxe~metaveille-commentaires-wqfr")
 BASE = "https://api.apify.com/v2/actor-tasks/" + urllib.parse.quote(TASK_ID, safe="~")
 TZ = ZoneInfo("Europe/Paris")
 
