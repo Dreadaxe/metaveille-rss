@@ -32,6 +32,8 @@ jobs:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: python build_rss.py
+      - name: Diagnostiquer la fraîcheur des publications
+        run: python check_freshness.py
       - name: Sauvegarder l'historique des collectes dans le dépôt
         run: |
           git config user.name 'MetaVeille Bot'
