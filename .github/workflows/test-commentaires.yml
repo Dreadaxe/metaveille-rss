@@ -13,3 +13,7 @@ jobs:
         with:
           python-version: '3.11'
       - run: python -m unittest -v test_comments.py
+      - name: Verify completed Apify dataset (read only)
+        env:
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+        run: python test_apify_existing_run.py
