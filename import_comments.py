@@ -14,7 +14,7 @@ def _post_id(item):
     if value.isdigit():
         return value
     for field in ("facebookUrl", "inputUrl", "commentUrl"):
-        match = re.search(r"/(?:posts|permalink)/(\\d+)", str(item.get(field) or ""))
+        match = re.search(r"/(?:posts|permalink)/(\d+)", str(item.get(field) or ""))
         if match:
             return match.group(1)
     return ""
@@ -38,9 +38,9 @@ def merge_comments_dataset(state, items, captured_at):
         post_id, cid = _post_id(item), _comment_id(item)
         url = str(item.get("commentUrl") or "")
         parent_url = str(item.get("facebookUrl") or item.get("inputUrl") or "")
-        if not post_id or not cid or not url.startswith("https://www.facebook.com/"):
+        if not post_id or not cid or not url.startswith("https://www.facebook.com/groups/"):
             continue
-        if not parent_url.startswith("https://www.facebook.com/groups/"):
+        if not (parent_url.startswith("https://www.facebook.com/groups/warhammerquestfr/") or parent_url.startswith("https://www.facebook.com/groups/309721797057912/")):
             continue
         author = item.get("author") if isinstance(item.get("author"), dict) else {}
         posts = state.setdefault("posts", {})
