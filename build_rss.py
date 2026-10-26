@@ -350,7 +350,7 @@ def build_week_data(state, start):
 def heading(info):
     d0 = info['start'].strftime('%d/%m/%Y')
     d1 = info['end'].strftime('%d/%m/%Y')
-    return f'{GROUP_NAME} — Semaine {info["week"]} — Bilan du {d0} au {d1}'
+    return f'Semaine {info["week"]} — Bilan du {d0} au {d1}'
 
 
 def week_filename(info):
