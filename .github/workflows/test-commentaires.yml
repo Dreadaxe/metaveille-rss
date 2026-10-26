@@ -10,6 +10,7 @@ name: Test commentaires
       - feature/audit-entree-apify
       - fix/audit-apify-input-store
       - fix/rss-titre-sans-doublon
+      - feature/bilan-semaines-calmes
   workflow_dispatch:
 jobs:
   tests:
@@ -19,7 +20,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: python -m unittest -v test_comments.py test_comments_discovery.py test_weekly_comments.py test_freshness.py test_audit_apify_posts.py test_audit_apify_input.py test_rss_title.py
+      - run: python -m unittest -v test_comments.py test_comments_discovery.py test_weekly_comments.py test_freshness.py test_audit_apify_posts.py test_audit_apify_input.py test_rss_title.py test_quiet_week.py
       - name: Verify completed Apify dataset (read only)
         env:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
