@@ -749,7 +749,37 @@
       "comments_count": 2,
       "shares_count": 0,
       "media_count": 5
+    },
+    "1587557222607690": {
+      "id": "1587557222607690",
+      "url": "https://www.facebook.com/groups/warhammerquestfr/posts/1587557222607690/",
+      "author": "Auteur de la publication non identifié",
+      "published_at": "",
+      "body": "",
+      "first_seen": "2026-10-26T17:40:07.037Z",
+      "last_seen": "2026-10-26T17:40:07.037Z",
+      "placeholder": true,
+      "comments": {
+        "1601080907921988": {
+          "id": "1601080907921988",
+          "first_seen": "2026-10-26T17:40:07.037Z",
+          "url": "https://www.facebook.com/groups/warhammerquestfr/posts/1587557222607690/?comment_id=1601080907921988",
+          "author": "Eric Chaussin",
+          "text": "mains droite deux pouces. main gauche manque auriculaire.",
+          "published_at": "2026-10-22T12:29:29.000Z",
+          "likes_count": 1,
+          "last_seen": "2026-10-26T17:40:07.037Z",
+          "threading_depth": 0
+        }
+      }
     }
   },
-  "updated_at": "2026-10-26T16:12:18+00:00"
+  "updated_at": "2026-10-26T18:11:19+00:00",
+  "comment_runs": {
+    "7q4GdkJQrvbNCXj0v": {
+      "items_read": 1,
+      "comments_added": 1,
+      "comments_updated": 0
+    }
+  }
 }
