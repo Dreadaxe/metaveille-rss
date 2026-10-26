@@ -20,11 +20,13 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from xml.etree import ElementTree as ET
 from zoneinfo import ZoneInfo
+from import_comments import merge_comments_dataset
 
 GROUP_ID = '309721797057912'
 GROUP_URL = 'https://www.facebook.com/groups/309721797057912/'
 GROUP_NAME = 'Groupe Facebook Warhammer Quest Fr'
 ACTOR_ID = '2chN8UQcH1CfxLRNE'  # Actor officiel utilisé par le run déjà vérifié
+COMMENTS_TEST_RUN_ID = 'us5srxAYnsrkgUv2v'  # Existing successful run; GET only
 TZ = ZoneInfo('Europe/Paris')
 ROOT = Path(__file__).resolve().parent
 STATE = ROOT / 'data' / 'state.json'
@@ -254,6 +256,26 @@ def sync_apify(state, token, now=None):
     return changes
 
 
+def sync_existing_comments_run(state, token, run_id=COMMENTS_TEST_RUN_ID):
+    """Read a completed comments run; never start an Actor or incur run charges."""
+    if run_id in state.setdefault('comment_runs', {}):
+        return {'already_imported': True, 'comments_added': 0}
+    response = api_json('/v2/actor-runs/' + urllib.parse.quote(run_id, safe=''), token)
+    run = response.get('data') or {}
+    if run.get('status') != 'SUCCEEDED':
+        raise RuntimeError('Exécution de commentaires non terminée avec succès.')
+    dataset_id = str(run.get('defaultDatasetId') or '')
+    if not re.fullmatch(r'[a-zA-Z0-9]+', dataset_id):
+        raise RuntimeError('Dataset de commentaires absent.')
+    query = urllib.parse.urlencode({'format': 'json', 'limit': MAX_ITEMS_PER_DATASET, 'offset': 0})
+    items = api_json('/v2/datasets/' + dataset_id + '/items?' + query, token)
+    if not isinstance(items, list):
+        raise RuntimeError('Format du dataset de commentaires invalide.')
+    result = merge_comments_dataset(state, items, run.get('finishedAt') or utc_now())
+    state['comment_runs'][run_id] = {'items_read': len(items), **result}
+    return result
+
+
 def week_start(today):
     if isinstance(today, datetime):
         today = today.astimezone(TZ).date()
@@ -266,7 +288,7 @@ def build_week_data(state, start):
     nnew_posts = 0
     nnew_comments = 0
     for p in state['posts'].values():
-        p_dt = when(p.get('published_at')) or when(p.get('first_seen'))
+        p_dt = when(p.get('published_at')) or (None if p.get('placeholder') else when(p.get('first_seen')))
         comments = []
         for c in p.get('comments', {}).values():
             dt = when(c.get('published_at')) or when(c.get('first_seen'))
@@ -296,7 +318,7 @@ def week_filename(info):
 
 def html_card(entry, n):
     p = entry['post']
-    title = flat(p.get('body') or 'Publication sans texte', 90)
+    title = flat(p.get('body') or ('Publication d’origine non archivée' if p.get('placeholder') else 'Publication sans texte'), 90)
     stats = []
     if isinstance(p.get('reactions'), int):
         bits = []
@@ -468,6 +490,7 @@ def main():
         token = os.environ.get('APIFY_TOKEN', '').strip()
         changes = sync_apify(state, token)
         print('Synchronisation:', changes)
+        print('Commentaires (run existant):', sync_existing_comments_run(state, token))
     d = date.fromisoformat(args.today) if args.today else datetime.now(TZ).date()
     files = make_site(state, today=d)
     # Only save an archive successfully synchronized or deliberately seeded/offline.
