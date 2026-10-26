@@ -1,0 +1,19 @@
+name: Test commentaires
+'on':
+  push:
+    branches:
+      - feature/commentaires-apify
+  workflow_dispatch:
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest -v test_comments.py
+      - name: Verify completed Apify dataset (read only)
+        env:
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+        run: python test_apify_existing_run.py
