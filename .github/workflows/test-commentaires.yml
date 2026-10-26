@@ -8,6 +8,7 @@ name: Test commentaires
       - feature/diagnostic-fraicheur
       - feature/audit-apify-publications
       - feature/audit-entree-apify
+      - fix/audit-apify-input-store
   workflow_dispatch:
 jobs:
   tests:
