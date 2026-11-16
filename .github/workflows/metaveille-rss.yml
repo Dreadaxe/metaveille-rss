@@ -1,6 +1,11 @@
 name: MetaVeille — Flux RSS automatique
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'build_rss.py'
+      - 'data/auteurs.json'
   schedule:
     # Apify collecte à 08:00 Europe/Paris. Archive à 10:23.
     # Une nouvelle entrée hebdomadaire apparaît le lundi.
