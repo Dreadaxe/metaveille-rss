@@ -498,6 +498,22 @@ def site_url():
 
 
 def make_site(state, today=None, base_url=None):
+    # Pseudonymes d'affichage : les archives conservent toujours les noms d'origine.
+    aliases_file = ROOT / 'data' / 'auteurs.json'
+    if aliases_file.is_file():
+        aliases = json.loads(aliases_file.read_text(encoding='utf-8'))
+        if not isinstance(aliases, dict) or not all(isinstance(k, str) and isinstance(v, str) for k, v in aliases.items()):
+            raise ValueError('data/auteurs.json doit contenir des correspondances nom: pseudonyme.')
+        lookup = {' '.join(k.split()).casefold(): v.strip() for k, v in aliases.items() if k.strip() and v.strip()}
+        state = copy.deepcopy(state)
+        for post in state.get('posts', {}).values():
+            if not isinstance(post, dict):
+                continue
+            post['author'] = lookup.get(' '.join(str(post.get('author') or '').split()).casefold(), post.get('author'))
+            for comment in (post.get('comments') or {}).values():
+                if isinstance(comment, dict):
+                    name = comment.get('author')
+                    comment['author'] = lookup.get(' '.join(str(name or '').split()).casefold(), name)
     today = today or datetime.now(TZ).date()
     base_url = base_url or site_url()
     SITE.mkdir(exist_ok=True, parents=True)
